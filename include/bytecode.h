@@ -14,7 +14,7 @@ struct Header {
   uint16_t version;
   uint16_t constantCount;
 };
-typedef uint64_t Constant;
+typedef int64_t Constant;
 } // namespace bytecode
 
 #endif

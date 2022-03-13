@@ -1,5 +1,6 @@
 #include "assembler.h"
 #include "bytecode.h"
+#include <climits>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -11,8 +12,8 @@ using std::cerr;
 using std::endl;
 using std::istream;
 using std::ostream;
-using std::stringbuf;
 using std::string;
+using std::stringbuf;
 using std::vector;
 
 namespace bytecode {
@@ -31,19 +32,19 @@ void assemble(istream &input, ostream &output) {
     if (word == "ipush") {
       Constant value;
       input >> value;
-      if (value < 65536) {
+      if (value <= INT16_MAX && value >= INT16_MIN) {
         pushInstruction(instructions, Opcode::IPUSH_IMM);
-        pushInstruction<uint16_t>(instructions, value);
+        pushInstruction<int16_t>(instructions, value);
       } else {
         if (constants.size() >= 65535) {
           cerr << "Too many constants in program" << endl;
           return;
         }
         pushInstruction(instructions, Opcode::IPUSH_CONST);
-        pushInstruction<uint16_t>(instructions, constants.size());
+        pushInstruction<int16_t>(instructions, constants.size());
         constants.push_back(value);
       }
-    }else if (word == "exit") {
+    } else if (word == "exit") {
       pushInstruction(instructions, Opcode::EXIT);
     }
   }

@@ -3,8 +3,6 @@
 
 #include <fstream>
 
-#include "bytecode.h"
-
 namespace bytecode {
 void assemble(std::istream &input, std::ostream &output);
 }

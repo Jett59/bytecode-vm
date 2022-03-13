@@ -1,5 +1,6 @@
 #include "assembler.h"
 #include "helper.h"
+#include "run.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -31,8 +32,11 @@ int main(int argc, char **argv) {
     ifstream input(file);
     ofstream output(file + ".bin", ios::binary);
     bytecode::assemble(input, output);
-  }  else {
-    cerr << "Running is not currently supported" << endl;
-    return -1;
+  } else {
+    ifstream input(file, ios::binary);
+    size_t fileSize = getFileSize(input);
+    char *fileBytes = new char[fileSize];
+    input.read(fileBytes, fileSize);
+    bytecode::run(fileBytes, fileSize);
   }
 }
