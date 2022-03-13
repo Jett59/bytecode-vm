@@ -8,6 +8,7 @@ using std::cerr;
 using std::cout;
 using std::endl;
 using std::ifstream;
+using std::ios;
 using std::ofstream;
 using std::string;
 
@@ -28,7 +29,7 @@ int main(int argc, char **argv) {
   string file(argv[1]);
   if (endsWith(file, ".vasm")) {
     ifstream input(file);
-    ofstream output(file + ".bin");
+    ofstream output(file + ".bin", ios::binary);
     bytecode::assemble(input, output);
   }  else {
     cerr << "Running is not currently supported" << endl;
