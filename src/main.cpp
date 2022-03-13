@@ -1,6 +1,7 @@
 #include "assembler.h"
 #include "helper.h"
 #include "run.h"
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -12,6 +13,9 @@ using std::ifstream;
 using std::ios;
 using std::ofstream;
 using std::string;
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
 
 static void usage(char *filePath) {
   cout << "Usage: " << filePath << " <file>" << endl;
@@ -37,6 +41,10 @@ int main(int argc, char **argv) {
     size_t fileSize = getFileSize(input);
     char *fileBytes = new char[fileSize];
     input.read(fileBytes, fileSize);
+    auto startTime = high_resolution_clock::now();
     bytecode::run(fileBytes, fileSize);
+    auto timeTaken = high_resolution_clock::now() - startTime;
+    cout << "It took " << duration_cast<milliseconds>(timeTaken).count() / 1000.0
+         << " seconds" << endl;
   }
 }

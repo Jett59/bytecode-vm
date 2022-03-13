@@ -52,6 +52,16 @@ void assemble(istream &input, ostream &output) {
       pushInstruction(instructions, Opcode::MUL);
     }else if (word == "div") {
       pushInstruction(instructions, Opcode::DIV);
+    }else if (word == "lload") {
+      uint16_t index;
+      input >> index;
+      pushInstruction(instructions, Opcode::LLOAD);
+      pushInstruction(instructions, index);
+    }else if (word == "lstore") {
+      uint16_t index;
+      input >> index;
+      pushInstruction(instructions, Opcode::LSTORE);
+      pushInstruction(instructions, index);
     } else if (word == "exit") {
       pushInstruction(instructions, Opcode::EXIT);
     }

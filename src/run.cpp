@@ -11,6 +11,7 @@ using std::endl;
 using std::istream;
 
 #define STACK_SIZE 256
+#define MAX_LOCALS 256
 
 namespace bytecode {
 struct VmContext {
@@ -18,6 +19,7 @@ struct VmContext {
   size_t ip;
   Constant stack[STACK_SIZE];
   size_t stackPointer;
+  Constant locals[MAX_LOCALS];
 };
 template <typename T> T readInstruction(VmContext &vm) {
   T &result = *((T *)(vm.instructions + vm.ip));
@@ -85,6 +87,16 @@ void run(void *program, size_t programSize) {
         cerr << "Divide by zero" << endl;
         return;
       }
+      break;
+    }
+    case Opcode::LLOAD: {
+      uint16_t index = readInstruction<uint16_t>(context);
+      push(context, context.locals[index]);
+      break;
+    }
+    case Opcode::LSTORE: {
+      uint16_t index = readInstruction<uint16_t>(context);
+      context.locals[index] = pop(context);
       break;
     }
     case Opcode::EXIT: {

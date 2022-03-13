@@ -1,6 +1,16 @@
-ipush 100
-ipush 5
-div
-ipush 7
-mul
+ipush 72
+ipush 28
+add
+lstore 0
+ipush 32
+ipush 18
+add
+lstore 1
+lload 0
+lload 0
+add
+lload 1
+lload 1
+add
+add
 exit
