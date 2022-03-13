@@ -99,6 +99,47 @@ void run(void *program, size_t programSize) {
       context.locals[index] = pop(context);
       break;
     }
+    case Opcode::GOTO: {
+      uint16_t offset = readInstruction<uint16_t>(context);
+      context.ip = offset;
+      break;
+    }
+    case Opcode::CGOTO_EQ: {
+      uint16_t offset = readInstruction<uint16_t>(context);
+      Constant right = pop(context);
+      Constant left = pop(context);
+      if (left == right) {
+        context.ip = offset;
+      }
+      break;
+    }
+    case Opcode::CGOTO_NEQ: {
+      uint16_t offset = readInstruction<uint16_t>(context);
+      Constant right = pop(context);
+      Constant left = pop(context);
+      if (left != right) {
+        context.ip = offset;
+      }
+      break;
+    }
+    case Opcode::CGOTO_GT: {
+      uint16_t offset = readInstruction<uint16_t>(context);
+      Constant right = pop(context);
+      Constant left = pop(context);
+      if (left > right) {
+        context.ip = offset;
+      }
+      break;
+    }
+    case Opcode::CGOTO_LT: {
+      uint16_t offset = readInstruction<uint16_t>(context);
+      Constant right = pop(context);
+      Constant left = pop(context);
+      if (left < right) {
+        context.ip = offset;
+      }
+      break;
+    }
     case Opcode::EXIT: {
       Constant result = pop(context);
       cout << "Finished with " << result << endl;

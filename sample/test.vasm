@@ -1,16 +1,14 @@
-ipush 72
-ipush 28
+ipush 0
+lstore 0
+goto l2
+l1:
+lload 0
+ipush 1
 add
 lstore 0
-ipush 32
-ipush 18
-add
-lstore 1
+l2:
 lload 0
+ipush 50000
+cgoto_lt l1
 lload 0
-add
-lload 1
-lload 1
-add
-add
 exit

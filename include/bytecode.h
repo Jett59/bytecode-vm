@@ -13,6 +13,11 @@ enum class Opcode : uint8_t {
   DIV,
   LLOAD,
   LSTORE,
+  GOTO,
+  CGOTO_EQ,
+  CGOTO_NEQ,
+  CGOTO_GT,
+  CGOTO_LT,
   EXIT
 };
 

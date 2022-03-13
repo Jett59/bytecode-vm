@@ -1,9 +1,11 @@
 #include "assembler.h"
 #include "bytecode.h"
+#include "helper.h"
 #include <climits>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -11,6 +13,7 @@
 using std::cerr;
 using std::endl;
 using std::istream;
+using std::map;
 using std::ostream;
 using std::string;
 using std::stringbuf;
@@ -26,6 +29,8 @@ void assemble(istream &input, ostream &output) {
   header.version = CURRENT_BYTECODE_VERSION;
   vector<Constant> constants;
   stringbuf instructions;
+  map<string, uint16_t> labels;
+  map<string, vector<uint16_t>> labelReferences;
   while (!input.eof()) {
     string word;
     input >> word;
@@ -44,26 +49,58 @@ void assemble(istream &input, ostream &output) {
         pushInstruction<int16_t>(instructions, constants.size());
         constants.push_back(value);
       }
-    }else if (word == "add") {
+    } else if (word == "add") {
       pushInstruction(instructions, Opcode::ADD);
-    }else if (word == "sub") {
+    } else if (word == "sub") {
       pushInstruction(instructions, Opcode::SUB);
-    }else if (word == "mul") {
+    } else if (word == "mul") {
       pushInstruction(instructions, Opcode::MUL);
-    }else if (word == "div") {
+    } else if (word == "div") {
       pushInstruction(instructions, Opcode::DIV);
-    }else if (word == "lload") {
+    } else if (word == "lload") {
       uint16_t index;
       input >> index;
       pushInstruction(instructions, Opcode::LLOAD);
       pushInstruction(instructions, index);
-    }else if (word == "lstore") {
+    } else if (word == "lstore") {
       uint16_t index;
       input >> index;
       pushInstruction(instructions, Opcode::LSTORE);
       pushInstruction(instructions, index);
+    } else if (word == "goto") {
+      string label;
+      input >> label;
+      pushInstruction(instructions, Opcode::GOTO);
+      labelReferences[label].push_back(instructions.str().length());
+      pushInstruction<uint16_t>(instructions, 0);
+    } else if (word == "cgoto_eq") {
+      string label;
+      input >> label;
+      pushInstruction(instructions, Opcode::CGOTO_EQ);
+      labelReferences[label].push_back(instructions.str().length());
+      pushInstruction<uint16_t>(instructions, 0);
+    } else if (word == "cgoto_neq") {
+      string label;
+      input >> label;
+      pushInstruction(instructions, Opcode::CGOTO_NEQ);
+      labelReferences[label].push_back(instructions.str().length());
+      pushInstruction<uint16_t>(instructions, 0);
+    } else if (word == "cgoto_gt") {
+      string label;
+      input >> label;
+      pushInstruction(instructions, Opcode::CGOTO_GT);
+      labelReferences[label].push_back(instructions.str().length());
+      pushInstruction<uint16_t>(instructions, 0);
+    } else if (word == "cgoto_lt") {
+      string label;
+      input >> label;
+      pushInstruction(instructions, Opcode::CGOTO_LT);
+      labelReferences[label].push_back(instructions.str().length());
+      pushInstruction<uint16_t>(instructions, 0);
     } else if (word == "exit") {
       pushInstruction(instructions, Opcode::EXIT);
+    } else if (endsWith(word, ":")) {
+      labels[word.substr(0, word.length() - 1)] = instructions.str().length();
     }
   }
   header.constantCount = constants.size();
@@ -71,6 +108,17 @@ void assemble(istream &input, ostream &output) {
   for (Constant constant : constants) {
     output.write((const char *)&constant, sizeof(Constant));
   }
-  output << instructions.str();
+  string instructionString = instructions.str();
+  for (const auto &label : labelReferences) {
+    uint16_t labelLocation = labels[label.first];
+    uint8_t labelLocationLow = labelLocation & 0xff;
+    uint8_t labelLocationHigh = (uint8_t)(labelLocation >> 8);
+    for (const auto &reference : label.second) {
+      // Little endian - low byte first
+      instructionString[reference] = labelLocationLow;
+      instructionString[reference + 1] = labelLocationHigh;
+    }
+  }
+  output << instructionString;
 }
 } // namespace bytecode
