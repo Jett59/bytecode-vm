@@ -4,10 +4,18 @@
 #include <cstdint>
 
 namespace bytecode {
-enum class Opcode : uint8_t { IPUSH_CONST, IPUSH_IMM, EXIT };
+enum class Opcode : uint8_t {
+  IPUSH_CONST,
+  IPUSH_IMM,
+  ADD,
+  SUB,
+  MUL,
+  DIV,
+  EXIT
+};
 
 #define BYTECODE_MAGIC 0xD74EF7F3
-#define CURRENT_BYTECODE_VERSION 0
+#define CURRENT_BYTECODE_VERSION 1
 
 struct Header {
   uint32_t magic;

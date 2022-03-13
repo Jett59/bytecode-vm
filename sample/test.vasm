@@ -1,2 +1,6 @@
-ipush 42
+ipush 100
+ipush 5
+div
+ipush 7
+mul
 exit

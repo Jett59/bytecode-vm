@@ -44,6 +44,14 @@ void assemble(istream &input, ostream &output) {
         pushInstruction<int16_t>(instructions, constants.size());
         constants.push_back(value);
       }
+    }else if (word == "add") {
+      pushInstruction(instructions, Opcode::ADD);
+    }else if (word == "sub") {
+      pushInstruction(instructions, Opcode::SUB);
+    }else if (word == "mul") {
+      pushInstruction(instructions, Opcode::MUL);
+    }else if (word == "div") {
+      pushInstruction(instructions, Opcode::DIV);
     } else if (word == "exit") {
       pushInstruction(instructions, Opcode::EXIT);
     }
