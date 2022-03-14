@@ -1,21 +1,45 @@
-#Count to 10000000
-#Initialise the counter
+# Add all of the odd numbers less than 100000
+
+# Locals:
+# 0: i
+# 1: total
+
+# Set i = total = 0
 ipush 0
+dup
 lstore 0
-#Begin with an initial check
-goto l2
-l1:
-#Increment counter
+lstore 1
+
+goto check
+
+loop:
+lload 0
+dup
+ipush 2
+div
+ipush 2
+mul
+sub
+ipush 1
+cgoto_neq increment
+
+odd:
+lload 0
+lload 1
+add
+lstore 1
+
+increment:
 lload 0
 ipush 1
 add
 lstore 0
-l2:
-#Compare counter with 10000000
+
+check:
 lload 0
-ipush 10000000
-cgoto_lt l1
-l3:
-#Return counter
-lload 0
+ipush 30000000
+cgoto_lt loop
+
+done:
+lload 1
 exit

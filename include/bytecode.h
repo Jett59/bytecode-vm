@@ -7,6 +7,7 @@ namespace bytecode {
 enum class Opcode : uint8_t {
   IPUSH_CONST,
   IPUSH_IMM,
+  DUP,
   ADD,
   SUB,
   MUL,

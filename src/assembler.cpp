@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 
-
 using std::cerr;
 using std::endl;
 using std::istream;
@@ -53,6 +52,8 @@ void assemble(istream &input, ostream &output) {
         pushInstruction<int16_t>(instructions, constants.size());
         constants.push_back(value);
       }
+    } else if (word == "dup") {
+      pushInstruction(instructions, Opcode::DUP);
     } else if (word == "add") {
       pushInstruction(instructions, Opcode::ADD);
     } else if (word == "sub") {

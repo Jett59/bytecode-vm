@@ -21,15 +21,18 @@ struct VmContext {
   size_t stackPointer;
   Constant locals[MAX_LOCALS];
 };
-template <typename T> T readInstruction(VmContext &vm) {
+template <typename T> static inline T readInstruction(VmContext &vm) {
   T &result = *((T *)(vm.instructions + vm.ip));
   vm.ip += sizeof(T);
   return result;
 }
-static void push(VmContext &vm, Constant value) {
+static inline void push(VmContext &vm, Constant value) {
   vm.stack[vm.stackPointer++] = value;
 }
-static Constant pop(VmContext &vm) { return vm.stack[--vm.stackPointer]; }
+static inline Constant pop(VmContext &vm) {
+  return vm.stack[--vm.stackPointer];
+}
+
 void run(void *program, size_t programSize) {
   Header *header = (Header *)program;
   if (header->magic != BYTECODE_MAGIC) {
@@ -60,6 +63,12 @@ void run(void *program, size_t programSize) {
       push(context, immediate);
       break;
     }
+    case Opcode::DUP: {
+      Constant value = pop(context);
+      push(context, value);
+      push(context, value);
+      break;
+    }
     case Opcode::ADD: {
       Constant right = pop(context);
       Constant left = pop(context);
@@ -83,7 +92,7 @@ void run(void *program, size_t programSize) {
       Constant left = pop(context);
       if (right != 0) {
         push(context, left / right);
-      }else {
+      } else {
         cerr << "Divide by zero" << endl;
         return;
       }
