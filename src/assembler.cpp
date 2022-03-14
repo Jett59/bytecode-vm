@@ -5,16 +5,20 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
+
 using std::cerr;
 using std::endl;
 using std::istream;
 using std::map;
+using std::numeric_limits;
 using std::ostream;
+using std::streamsize;
 using std::string;
 using std::stringbuf;
 using std::vector;
@@ -99,8 +103,15 @@ void assemble(istream &input, ostream &output) {
       pushInstruction<uint16_t>(instructions, 0);
     } else if (word == "exit") {
       pushInstruction(instructions, Opcode::EXIT);
+    } else if (startsWith(word, "#")) {
+      input.ignore(numeric_limits<streamsize>::max(), input.widen('\n'));
     } else if (endsWith(word, ":")) {
       labels[word.substr(0, word.length() - 1)] = instructions.str().length();
+    } else if (word == "") {
+      continue;
+    } else {
+      cerr << "Unknown opcode " << word << endl;
+      return;
     }
   }
   header.constantCount = constants.size();

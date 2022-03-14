@@ -5,7 +5,9 @@
 #include <fstream>
 #include <string>
 
-
+static inline bool startsWith(const std::string &s, const std::string &prefix) {
+  return s.rfind(prefix, 0) == 0;
+}
 static inline bool endsWith(const std::string &s, const std::string &suffix) {
   if (s.length() >= suffix.length()) {
     return s.compare(s.length() - suffix.length(), suffix.length(), suffix) ==

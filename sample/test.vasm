@@ -1,14 +1,21 @@
+#Count to 10000000
+#Initialise the counter
 ipush 0
 lstore 0
+#Begin with an initial check
 goto l2
 l1:
+#Increment counter
 lload 0
 ipush 1
 add
 lstore 0
 l2:
+#Compare counter with 10000000
 lload 0
-ipush 50000
+ipush 10000000
 cgoto_lt l1
+l3:
+#Return counter
 lload 0
 exit

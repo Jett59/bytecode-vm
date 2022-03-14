@@ -42,7 +42,7 @@ void run(void *program, size_t programSize) {
   }
   Constant *constants = (Constant *)((uint8_t *)program + sizeof(Header));
   uint8_t *instructions = (uint8_t *)(constants + header->constantCount);
-  size_t instructionBytes = programSize - (instructions - program);
+  size_t instructionBytes = programSize - (instructions - (uint8_t *)program);
   VmContext context;
   context.instructions = instructions;
   context.ip = 0;

@@ -10,5 +10,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
+# Visual studio files
+.vscode/
+
 # Build output
-build/
+vm
