@@ -69,8 +69,18 @@ void run(void *program, size_t programSize) {
       push(context, value);
       break;
     }
+    case Opcode::DROP: {
+      pop(context);
+      break;
+    }
     case Opcode::ADD: {
       Constant right = pop(context);
+      Constant left = pop(context);
+      push(context, left + right);
+      break;
+    }
+    case Opcode::IADD: {
+      int16_t right = readInstruction<int16_t>(context);
       Constant left = pop(context);
       push(context, left + right);
       break;
@@ -81,8 +91,20 @@ void run(void *program, size_t programSize) {
       push(context, left - right);
       break;
     }
+    case Opcode::ISUB: {
+      int16_t right = readInstruction<int16_t>(context);
+      Constant left = pop(context);
+      push(context, left - right);
+      break;
+    }
     case Opcode::MUL: {
       Constant right = pop(context);
+      Constant left = pop(context);
+      push(context, left * right);
+      break;
+    }
+    case Opcode::IMUL: {
+      int16_t right = readInstruction<int16_t>(context);
       Constant left = pop(context);
       push(context, left * right);
       break;
@@ -93,6 +115,17 @@ void run(void *program, size_t programSize) {
       if (right != 0) {
         push(context, left / right);
       } else {
+        cerr << "Divide by zero" << endl;
+        return;
+      }
+      break;
+    }
+    case Opcode::IDIV: {
+      int16_t right = readInstruction<int16_t>(context);
+      Constant left = pop(context);
+      if (right != 0) {
+        push(context, left / right);
+      }else {
         cerr << "Divide by zero" << endl;
         return;
       }

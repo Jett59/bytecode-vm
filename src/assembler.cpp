@@ -54,14 +54,36 @@ void assemble(istream &input, ostream &output) {
       }
     } else if (word == "dup") {
       pushInstruction(instructions, Opcode::DUP);
+    } else if (word == "drop") {
+      pushInstruction(instructions, Opcode::DROP);
     } else if (word == "add") {
       pushInstruction(instructions, Opcode::ADD);
+    }else if (word == "iadd") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::IADD);
+      pushInstruction(instructions, value);
     } else if (word == "sub") {
       pushInstruction(instructions, Opcode::SUB);
+    }else if (word == "isub") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::ISUB);
+      pushInstruction(instructions, value);
     } else if (word == "mul") {
       pushInstruction(instructions, Opcode::MUL);
+    }else if (word == "imul") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::IMUL);
+      pushInstruction(instructions, value);
     } else if (word == "div") {
       pushInstruction(instructions, Opcode::DIV);
+    }else if (word == "idiv") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::IDIV);
+      pushInstruction(instructions, value);
     } else if (word == "lload") {
       uint16_t index;
       input >> index;
