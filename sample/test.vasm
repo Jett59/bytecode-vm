@@ -15,8 +15,8 @@ goto check
 loop:
 lload 0
 dup
-idiv 2
-imul 2
+irshift 1
+ilshift 1
 sub
 ipush 1
 cgoto_neq increment

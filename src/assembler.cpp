@@ -84,6 +84,20 @@ void assemble(istream &input, ostream &output) {
       input >> value;
       pushInstruction(instructions, Opcode::IDIV);
       pushInstruction(instructions, value);
+    }else if (word == "lshift") {
+      pushInstruction(instructions, Opcode::LSHIFT);
+    }else if (word == "ilshift") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::ILSHIFT);
+      pushInstruction(instructions, value);
+    }else if (word == "rshift") {
+      pushInstruction(instructions, Opcode::RSHIFT);
+    }else if (word == "irshift") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::IRSHIFT);
+      pushInstruction(instructions, value);
     } else if (word == "lload") {
       uint16_t index;
       input >> index;

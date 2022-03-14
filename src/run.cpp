@@ -131,6 +131,30 @@ void run(void *program, size_t programSize) {
       }
       break;
     }
+    case Opcode::LSHIFT: {
+      Constant right = pop(context);
+      Constant left = pop(context);
+      push(context, left << right);
+      break;
+    }
+    case Opcode::ILSHIFT: {
+      int16_t right = readInstruction<int16_t>(context);
+      Constant left = pop(context);
+      push(context, left << right);
+      break;
+    }
+    case Opcode::RSHIFT: {
+      Constant right = pop(context);
+      Constant left = pop(context);
+      push(context, left >> right);
+      break;
+    }
+    case Opcode::IRSHIFT: {
+      int16_t right = readInstruction<int16_t>(context);
+      Constant left = pop(context);
+      push(context, left >> right);
+      break;
+    }
     case Opcode::LLOAD: {
       uint16_t index = readInstruction<uint16_t>(context);
       push(context, context.locals[index]);
