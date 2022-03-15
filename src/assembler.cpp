@@ -98,6 +98,27 @@ void assemble(istream &input, ostream &output) {
       input >> value;
       pushInstruction(instructions, Opcode::IRSHIFT);
       pushInstruction(instructions, value);
+    }else if (word == "and") {
+      pushInstruction(instructions, Opcode::AND);
+    }else if (word == "iand") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::IAND);
+      pushInstruction(instructions, value);
+    }else if (word == "or") {
+      pushInstruction(instructions, Opcode::OR);
+    }else if (word == "ior") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::IOR);
+      pushInstruction(instructions, value);
+    }else if (word == "xor") {
+      pushInstruction(instructions, Opcode::XOR);
+    }else if (word == "ixor") {
+      int16_t value;
+      input >> value;
+      pushInstruction(instructions, Opcode::IXOR);
+      pushInstruction(instructions, value);
     } else if (word == "lload") {
       uint16_t index;
       input >> index;

@@ -155,6 +155,42 @@ void run(void *program, size_t programSize) {
       push(context, left >> right);
       break;
     }
+    case Opcode::AND: {
+      Constant right = pop(context);
+      Constant left = pop(context);
+      push(context, left & right);
+      break;
+    }
+    case Opcode::IAND: {
+      int16_t right = readInstruction<int16_t>(context);
+      Constant left = pop(context);
+      push(context, left & right);
+      break;
+    }
+    case Opcode::OR: {
+      Constant right = pop(context);
+      Constant left = pop(context);
+      push(context, left | right);
+      break;
+    }
+    case Opcode::IOR: {
+      int16_t right = readInstruction<int16_t>(context);
+      Constant left = pop(context);
+      push(context, left | right);
+      break;
+    }
+    case Opcode::XOR: {
+      Constant right = pop(context);
+      Constant left = pop(context);
+      push(context, left ^ right);
+      break;
+    }
+    case Opcode::IXOR: {
+      int16_t right = readInstruction<int16_t>(context);
+      Constant left = pop(context);
+      push(context, left ^ right);
+      break;
+    }
     case Opcode::LLOAD: {
       uint16_t index = readInstruction<uint16_t>(context);
       push(context, context.locals[index]);
@@ -212,7 +248,7 @@ void run(void *program, size_t programSize) {
       return;
     }
     default:
-      cerr << "Unknown instruction" << endl;
+      cerr << "Unknown instruction " << (int)opcode << endl;
       return;
     }
   }

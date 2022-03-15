@@ -14,10 +14,7 @@ goto check
 
 loop:
 lload 0
-dup
-irshift 1
-ilshift 1
-sub
+iand 1
 ipush 1
 cgoto_neq increment
 
