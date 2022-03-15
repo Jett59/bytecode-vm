@@ -33,7 +33,7 @@ static inline Constant pop(VmContext &vm) {
   return vm.stack[--vm.stackPointer];
 }
 
-void run(void *program, size_t programSize) {
+void run(void *program, size_t) {
   Header *header = (Header *)program;
   if (header->magic != BYTECODE_MAGIC) {
     cerr << "This is not a bytecode file" << endl;
@@ -45,12 +45,11 @@ void run(void *program, size_t programSize) {
   }
   Constant *constants = (Constant *)((uint8_t *)program + sizeof(Header));
   uint8_t *instructions = (uint8_t *)(constants + header->constantCount);
-  size_t instructionBytes = programSize - (instructions - (uint8_t *)program);
   VmContext context;
   context.instructions = instructions;
   context.ip = 0;
   context.stackPointer = 0;
-  while (context.ip < instructionBytes) {
+  while (true) {
     Opcode opcode = readInstruction<Opcode>(context);
     switch (opcode) {
     case Opcode::IPUSH_CONST: {
@@ -252,6 +251,5 @@ void run(void *program, size_t programSize) {
       return;
     }
   }
-  cerr << "End of instruction stream" << endl;
 }
 } // namespace bytecode

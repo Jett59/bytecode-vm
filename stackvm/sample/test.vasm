@@ -9,7 +9,6 @@ ipush 0
 dup
 lstore 0
 lstore 1
-
 goto check
 
 loop:
