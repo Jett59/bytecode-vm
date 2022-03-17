@@ -18,6 +18,7 @@ using std::istream;
 using std::map;
 using std::ostream;
 using std::range_error;
+using std::runtime_error;
 using std::stoi;
 using std::string;
 using std::vector;
@@ -33,14 +34,13 @@ static inline char *skipIndent(char *str) {
 }
 
 string nextWord(char *&str) {
-  char c = *str++;
-  while (isspace(c)) {
-    c = *str++;
+  while (isspace(*str)) {
+    str++;
   }
   string word;
-  while (!isspace(c) && c != 0) {
-    word += c;
-    c = *str++;
+  while (!isspace(*str) && *str != 0) {
+    word += *str;
+    str++;
   }
   return word;
 }
@@ -90,16 +90,15 @@ vector<Operand> getOperands(char *&line) {
     }
   }
   if (nextWord(line).length() != 0) {
-    cerr << "Warning: Characters at end of line" << endl;
+    throw runtime_error("Characters at end of line");
   }
   return result;
 }
 
-static map<string, Opcode> mnemonics = {{"mov", Opcode::MOV},
-                                        {"add", Opcode::ADD},
-                                        {"sub", Opcode::SUB},
-                                        {"mul", Opcode::MUL},
-                                        {"div", Opcode::DIV}};
+static map<string, Opcode> mnemonics = {
+    {"mov", Opcode::MOV},  {"add", Opcode::ADD}, {"sub", Opcode::SUB},
+    {"mul", Opcode::MUL},  {"div", Opcode::DIV}, {"print", Opcode::PRINT},
+    {"exit", Opcode::EXIT}};
 
 void assemble(istream &input, ostream &output) {
   try {
@@ -113,7 +112,7 @@ void assemble(istream &input, ostream &output) {
         string mnemonic = nextWord(line);
         Opcode opcode = mnemonics[mnemonic];
         vector<Operand> operands = getOperands(line);
-        Instruction instruction = {0};
+        Instruction instruction = {};
         instruction.opcode = (uint8_t)opcode;
         switch (operands.size()) {
         case 0: {
@@ -180,6 +179,9 @@ void assemble(istream &input, ostream &output) {
       }
       input.getline(inputLine, MAXLINE);
     }
+    Header header;
+    header.magic = BYTECODE_MAGIC;
+    output.write((char *)&header, sizeof(Header));
     for (Instruction &instruction : instructions) {
       output.write((char *)&instruction, sizeof(Instruction));
     }
