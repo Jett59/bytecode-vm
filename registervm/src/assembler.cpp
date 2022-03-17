@@ -5,6 +5,7 @@
 #include <cstring>
 #include <exception>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <string>
@@ -13,6 +14,7 @@
 using std::cerr;
 using std::endl;
 using std::exception;
+using std::function;
 using std::invalid_argument;
 using std::istream;
 using std::map;
@@ -56,7 +58,9 @@ struct Operand {
   } value;
 };
 
-vector<Operand> getOperands(char *&line) {
+vector<Operand>
+getOperands(char *&line,
+            const function<void(const string &)> &labelReferenceCallback) {
   vector<Operand> result;
   string word = nextWord(line);
   if (word.length() > 0) {
@@ -81,7 +85,11 @@ vector<Operand> getOperands(char *&line) {
           throw invalid_argument("Dereferenced immediate");
         }
         operand.type = OperandType::IMMEDIATE;
+        if (word.at(0) == '&') {
+          labelReferenceCallback(word.substr(1));
+        }else {
         operand.value.immediateValue = stoi(word);
+        }
       }
       result.push_back(operand);
       if (moreOperands) {
@@ -96,12 +104,14 @@ vector<Operand> getOperands(char *&line) {
 }
 
 static map<string, Opcode> mnemonics = {
-    {"mov", Opcode::MOV},  {"add", Opcode::ADD}, {"sub", Opcode::SUB},
-    {"mul", Opcode::MUL},  {"div", Opcode::DIV}, {"print", Opcode::PRINT},
-    {"exit", Opcode::EXIT}};
+    {"mov", Opcode::MOV},   {"add", Opcode::ADD},  {"sub", Opcode::SUB},
+    {"mul", Opcode::MUL},   {"div", Opcode::DIV},  {"print", Opcode::PRINT},
+    {"exit", Opcode::EXIT}, {"goto", Opcode::GOTO}};
 
 void assemble(istream &input, ostream &output) {
   try {
+    map<string, size_t> labelOffsets;
+    map<string, vector<size_t>> labelReferences;
     vector<Instruction> instructions;
     char inputLine[MAXLINE];
     input.getline(inputLine, MAXLINE);
@@ -110,74 +120,87 @@ void assemble(istream &input, ostream &output) {
       int lineLength = strlen(line);
       if (lineLength != 0 && *line != '#') {
         string mnemonic = nextWord(line);
-        Opcode opcode = mnemonics[mnemonic];
-        vector<Operand> operands = getOperands(line);
-        Instruction instruction = {};
-        instruction.opcode = (uint8_t)opcode;
-        switch (operands.size()) {
-        case 0: {
-          break;
+        if (mnemonic.at(mnemonic.length() - 1) == ':') {
+          string labelName = mnemonic.substr(0, mnemonic.length() - 1);
+          labelOffsets[labelName] = instructions.size();
+        } else {
+          Opcode opcode = mnemonics[mnemonic];
+          vector<Operand> operands = getOperands(line, [&](string labelName) {
+            labelReferences[labelName].push_back(instructions.size());
+          });
+          Instruction instruction = {};
+          instruction.opcode = (uint8_t)opcode;
+          switch (operands.size()) {
+          case 0: {
+            break;
+          }
+          case 1: {
+            Operand operand = operands.at(0);
+            if (operand.type == OperandType::IMMEDIATE) {
+              instruction.hasImmediate = true;
+              instruction.immediate = operand.value.immediateValue;
+            } else {
+              instruction.hasImmediate = false;
+              instruction.dst = operand.value.registerNumber;
+              instruction.dstUsesMemory = operand.memoryOperand;
+            }
+            break;
+          }
+          case 2: {
+            Operand srcOperand = operands.at(0);
+            Operand dstOperand = operands.at(1);
+            if (dstOperand.type != OperandType::REGISTER) {
+              throw invalid_argument("Destination operand is immediate");
+            }
+            if (srcOperand.type == OperandType::IMMEDIATE) {
+              instruction.hasImmediate = true;
+              instruction.immediate = srcOperand.value.immediateValue;
+            } else {
+              instruction.hasImmediate = false;
+              instruction.src1 = srcOperand.value.registerNumber;
+              instruction.src1UsesMemory = srcOperand.memoryOperand;
+            }
+            instruction.dst = dstOperand.value.registerNumber;
+            instruction.dstUsesMemory = dstOperand.memoryOperand;
+            break;
+          }
+          case 3: {
+            Operand src1Operand = operands.at(0);
+            Operand src2Operand = operands.at(1);
+            Operand dstOperand = operands.at(2);
+            if (src2Operand.type != OperandType::REGISTER) {
+              throw invalid_argument("Source operand two is immediate");
+            }
+            if (dstOperand.type != OperandType::REGISTER) {
+              throw invalid_argument("Destination operand is immediate");
+            }
+            if (src1Operand.type == OperandType::IMMEDIATE) {
+              instruction.hasImmediate = true;
+              instruction.immediate = src1Operand.value.immediateValue;
+            } else {
+              instruction.hasImmediate = false;
+              instruction.src1 = src1Operand.value.registerNumber;
+              instruction.src1UsesMemory = src1Operand.memoryOperand;
+            }
+            instruction.src2 = src2Operand.value.registerNumber;
+            instruction.src2UsesMemory = src2Operand.memoryOperand;
+            instruction.dst = dstOperand.value.registerNumber;
+            instruction.dstUsesMemory = dstOperand.memoryOperand;
+            break;
+          }
+          default:
+            throw invalid_argument("More than three operands");
+          }
+          instructions.push_back(instruction);
         }
-        case 1: {
-          Operand operand = operands.at(0);
-          if (operand.type == OperandType::IMMEDIATE) {
-            instruction.hasImmediate = true;
-            instruction.immediate = operand.value.immediateValue;
-          } else {
-            instruction.hasImmediate = false;
-            instruction.dst = operand.value.registerNumber;
-            instruction.dstUsesMemory = operand.memoryOperand;
-          }
-          break;
-        }
-        case 2: {
-          Operand srcOperand = operands.at(0);
-          Operand dstOperand = operands.at(1);
-          if (dstOperand.type != OperandType::REGISTER) {
-            throw invalid_argument("Destination operand is immediate");
-          }
-          if (srcOperand.type == OperandType::IMMEDIATE) {
-            instruction.hasImmediate = true;
-            instruction.immediate = srcOperand.value.immediateValue;
-          } else {
-            instruction.hasImmediate = false;
-            instruction.src1 = srcOperand.value.registerNumber;
-            instruction.src1UsesMemory = srcOperand.memoryOperand;
-          }
-          instruction.dst = dstOperand.value.registerNumber;
-          instruction.dstUsesMemory = dstOperand.memoryOperand;
-          break;
-        }
-        case 3: {
-          Operand src1Operand = operands.at(0);
-          Operand src2Operand = operands.at(1);
-          Operand dstOperand = operands.at(2);
-          if (src2Operand.type != OperandType::REGISTER) {
-            throw invalid_argument("Source operand two is immediate");
-          }
-          if (dstOperand.type != OperandType::REGISTER) {
-            throw invalid_argument("Destination operand is immediate");
-          }
-          if (src1Operand.type == OperandType::IMMEDIATE) {
-            instruction.hasImmediate = true;
-            instruction.immediate = src1Operand.value.immediateValue;
-          } else {
-            instruction.hasImmediate = false;
-            instruction.src1 = src1Operand.value.registerNumber;
-            instruction.src1UsesMemory = src1Operand.memoryOperand;
-          }
-          instruction.src2 = src2Operand.value.registerNumber;
-          instruction.src2UsesMemory = src2Operand.memoryOperand;
-          instruction.dst = dstOperand.value.registerNumber;
-          instruction.dstUsesMemory = dstOperand.memoryOperand;
-          break;
-        }
-        default:
-          throw invalid_argument("More than three operands");
-        }
-        instructions.push_back(instruction);
       }
       input.getline(inputLine, MAXLINE);
+    }
+    for (auto &references : labelReferences) {
+      size_t labelOffset = labelOffsets[references.first];
+      for (auto &offset : references.second) {
+        instructions.at(offset).immediate = labelOffset;
+      }
     }
     Header header;
     header.magic = BYTECODE_MAGIC;

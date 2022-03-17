@@ -125,6 +125,11 @@ void run(void *program, size_t programSize) {
       writeDestination(instruction, src2 / src1);
       break;
     }
+    case Opcode::GOTO: {
+      Word offset = readSingleOperand(instruction);
+      vm.ip = offset;
+      break;
+    }
     case Opcode::PRINT: {
       Word value = readSingleOperand(instruction);
       cout << value << endl;

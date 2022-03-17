@@ -23,7 +23,7 @@ struct Instruction {
 };
 static_assert(sizeof(Instruction) == 4,
               "Instruction must be packed to four bytes");
-enum class Opcode { MOV, ADD, SUB, MUL, DIV, PRINT, EXIT };
+enum class Opcode { MOV, ADD, SUB, MUL, DIV, GOTO, PRINT, EXIT };
 } // namespace bytecode
 
 #endif
